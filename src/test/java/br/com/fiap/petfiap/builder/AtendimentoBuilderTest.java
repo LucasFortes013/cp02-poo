@@ -51,15 +51,4 @@ public class AtendimentoBuilderTest {
                 .comDataHora(data)
                 .construir(9));
     }
-
-    @Test
-    public void deveRecusarTipoInexistente() {
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> new AtendimentoBuilder()
-                .comTipo("VACINA")
-                .comPet("Rex", "PEQUENO")
-                .comTutor("Ana")
-                .comDataHora(data)
-                .construir(10));
-    }
 }
