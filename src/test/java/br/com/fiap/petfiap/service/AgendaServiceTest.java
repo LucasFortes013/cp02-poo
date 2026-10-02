@@ -36,7 +36,8 @@ public class AgendaServiceTest {
     private AgendaService service;
 
     private Banho banhoDoRexAmanha10h() {
-        return new Banho(1, "Rex", "PEQUENO", "Ana", LocalDateTime.now().plusDays(1).withNano(0));
+        return new Banho(1, "Rex", "PEQUENO", "Ana",
+                LocalDateTime.now().plusDays(1).withNano(0));
     }
 
     @Test
@@ -61,13 +62,23 @@ public class AgendaServiceTest {
         Banho existente = banhoDoRexAmanha10h();
         when(repository.findByPetNome("Rex")).thenReturn(List.of(existente));
 
-        // A MESMA data/hora em outro objeto: e o que acontece no mundo real,
-        // quando duas requisicoes diferentes trazem valores iguais
-        LocalDateTime mesmoHorarioEmOutroObjeto = LocalDateTime.parse(existente.getDataHora().toString());
-        Banho novaTentativa = new Banho(2, "Rex", "PEQUENO", "Ana", mesmoHorarioEmOutroObjeto);
+        // A MESMA data/hora em outro objeto
+        LocalDateTime mesmoHorarioEmOutroObjeto =
+                LocalDateTime.parse(existente.getDataHora().toString());
+
+        Banho novaTentativa = new Banho(
+                2,
+                "Rex",
+                "PEQUENO",
+                "Ana",
+                mesmoHorarioEmOutroObjeto
+        );
 
         // Act + Assert
-        assertThrows(HorarioOcupadoException.class, () -> service.agendar(novaTentativa));
+        assertThrows(
+                HorarioOcupadoException.class,
+                () -> service.agendar(novaTentativa)
+        );
 
         // O banco NUNCA e acionado com o conflito detectado
         verify(repository, never()).save(any());
@@ -95,8 +106,11 @@ public class AgendaServiceTest {
         jaConcluido.setStatus("CONCLUIDO");
         when(repository.findById(1L)).thenReturn(Optional.of(jaConcluido));
 
-        // Act + Assert: a excecao ESPERADA
-        assertThrows(StatusInvalidoException.class, () -> service.concluir(1L));
+        // Act + Assert
+        assertThrows(
+                StatusInvalidoException.class,
+                () -> service.concluir(1L)
+        );
 
         // Nada e salvo quando a operacao e recusada
         verify(repository, never()).save(any());
@@ -108,6 +122,31 @@ public class AgendaServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
         // Act + Assert
-        assertThrows(AtendimentoNaoEncontradoException.class, () -> service.buscarPorId(99L));
+        assertThrows(
+                AtendimentoNaoEncontradoException.class,
+                () -> service.buscarPorId(99L)
+        );
+    }
+
+    @Test
+    public void deveRecusarAgendamentoComDataHoraNoPassado() {
+        // Arrange
+        Banho banho = new Banho(
+                1,
+                "Rex",
+                "PEQUENO",
+                "Ana",
+                LocalDateTime.now().minusDays(1)
+        );
+
+        // Act + Assert
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.agendar(banho)
+        );
+
+        // O banco nao deve ser consultado
+        verify(repository, never()).findByPetNome(any());
+        verify(repository, never()).save(any());
     }
 }
