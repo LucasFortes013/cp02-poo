@@ -21,7 +21,9 @@ public class AgendaService {
         if (novo.getDataHora().isBefore(java.time.LocalDateTime.now())) {
             throw new IllegalArgumentException("Data e hora do atendimento nao podem estar no passado");
         }
+
         List<Atendimento> doPet = repository.findByPetNome(novo.getPetNome());
+
         for (Atendimento a : doPet) {
             if (a.getPetNome().equals(novo.getPetNome()) && a.getDataHora().equals(novo.getDataHora())
                     && "AGENDADO".equals(a.getStatus())) {
@@ -29,16 +31,15 @@ public class AgendaService {
                         "Pet " + novo.getPetNome() + " ja possui atendimento agendado nesse horario");
             }
         }
+
         Atendimento salvo = repository.save(novo);
-        System.out.println("Recibo: atendimento " + salvo.getProtocolo()
-                + " agendado para " + salvo.getPetNome() + " (tutor " + salvo.getTutorNome() + ")");
         return salvo;
     }
 
     // Busca pelo id; nunca retorna null, o orElseThrow garante a excecao.
     public Atendimento buscarPorId(Long id) {
-    return repository.findById(id)
-            .orElseThrow(() -> new AtendimentoNaoEncontradoException("Atendimento nao encontrado: " + id));
+        return repository.findById(id)
+                .orElseThrow(() -> new AtendimentoNaoEncontradoException("Atendimento nao encontrado: " + id));
     }
 
     // Conclui o atendimento (status AGENDADO -> CONCLUIDO).
