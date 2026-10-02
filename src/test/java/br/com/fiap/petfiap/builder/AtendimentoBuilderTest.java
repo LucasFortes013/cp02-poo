@@ -32,7 +32,7 @@ public class AtendimentoBuilderTest {
 
     @Test
     public void deveRecusarMontagemSemNomeDoPet() {
-        // Act + Assert: o objeto so nasce valido (validacao concentrada no construir)
+        // Act + Assert: o objeto so nasce valido
         assertThrows(IllegalArgumentException.class, () -> new AtendimentoBuilder()
                 .comTipo("BANHO")
                 .comPet(null, "PEQUENO")
@@ -50,5 +50,16 @@ public class AtendimentoBuilderTest {
                 .comTutor("Ana")
                 .comDataHora(data)
                 .construir(9));
+    }
+
+    @Test
+    public void deveRecusarTipoInexistente() {
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class, () -> new AtendimentoBuilder()
+                .comTipo("VACINA")
+                .comPet("Rex", "PEQUENO")
+                .comTutor("Ana")
+                .comDataHora(data)
+                .construir(10));
     }
 }
